@@ -1,0 +1,5 @@
+This project, started in mid July 2018, models collagen fibrils as cylinders with radius R and infinite length, using a hybrid phase field crystal and liquid crystal continuum theory approach. It is a Phase Field Collagen Fibril (PFCF) model.
+
+We require the fibrils to have an axial density modulation (the collagen fibril ``d-band''), and a local double twist director field. The density modulation is constant with $r$ and $\phi$, but is periodic in $z$ where ($r$,$\phi$,$z$) are the usual cylindrical polar coordinates. This repository is similar to the pfcf-basic repository, as it is also a phase-field collagen fibril (pfcf) model. The difference is, in this repository, there is also a molten (disordered) core in which there is no d-banding present. Mathematically, the only difference is that the d-band has the form $\delta(r) \cos(\eta z)$, the amplitude $\delta(r)=0$ for $R<R_c$, where $R_c$ is the size of the disordered core.
+
+IMPORTANT: All generated data files and plots (i.e. results) are not included in this repository. They are saved locally and synced by hand into my dropbox account (in the directory Dropbox/masters/pfcf-moltencore/experiments/ ).
