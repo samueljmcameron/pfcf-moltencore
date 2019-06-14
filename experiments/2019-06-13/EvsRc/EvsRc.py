@@ -8,17 +8,10 @@ from readparams import ReadParams
 
 if __name__=="__main__":
 
-    start_time = time.time()
-
-    if len(sys.argv)<5:
-
-        user_input = input("input string of a gamma,k24,Lambda,omega values, "
-                           "using comma as delimiter: ")
-        gamma,k24,Lambda,omega = user_input.split(',')
-
-    else:
-        gamma,k24,Lambda,omega = sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4]
-
+    gamma = str(0.04)
+    k24 = str(0.5)
+    Lambda = str(600.0)
+    omega = str(20.0)
 
     scan = {}
     scan['k_{24}'] = k24
@@ -33,7 +26,7 @@ if __name__=="__main__":
     rp = ReadParams(scan=scan,loadsuf=loadsuf,savesuf=loadsuf)
         
     # create a class to do calculations with current parameters in scan.
-    run = SingleRun(rp,executable="../../../bin/EvsR0")
+    run = SingleRun(rp,executable="../../../bin/EvsRc")
     # run C executable.
     run.run_exe()
 

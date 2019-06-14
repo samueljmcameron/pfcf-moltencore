@@ -24,7 +24,7 @@ void difeq(int k, int k1, int k2, int jsf, int isl, int isf,
 
     double delta = p->delta;
     
-    if (k < p->i0) {
+    if (k < p->i_c) {
       double delta = 0.0;
     }
     

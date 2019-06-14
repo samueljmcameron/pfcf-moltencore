@@ -49,7 +49,7 @@ double E_calc(struct params *p)
   
   void propagate_r(double *r, double h,int mpt);
   
-  int find_i0(double R0, double *r);
+  int find_i_c(double R_c, double *r);
   
   bool successful_E_count(double *E,struct params *p);
 
@@ -65,8 +65,8 @@ double E_calc(struct params *p)
 
 
   if (p->R <= 0 || p->eta <= 0 || p->eta >= 8.0
-      || fabs(p->delta) >= 1.0 || p->R0 >= p->R || p->R0 < -1e-8) {
-    printf("p->R = %e, p->R0 = %e, p->eta = %e, p->delta = %e\n",p->R,p->R0,p->eta,p->delta);
+      || fabs(p->delta) >= 1.0 || p->R_c >= p->R || p->R_c < -1e-8) {
+    printf("p->R = %e, p->R_c = %e, p->eta = %e, p->delta = %e\n",p->R,p->R_c,p->eta,p->delta);
     printf("something is too big or less than zero, so returning failed calculation.\n");
     return FAILED_E;
   }
@@ -76,7 +76,7 @@ double E_calc(struct params *p)
 
   propagate_r(p->r,h,p->mpt);
 
-  p->i0 = find_i0(p->R0,p->r);
+  p->i_c = find_i_c(p->R_c,p->r);
   
   solvde_wrapper(scalv,p,h,false);
 
@@ -152,9 +152,9 @@ bool successful_E_count(double *E,struct params *p)
 
   compute_rfb(p);
   
-  find_zs(p->r+1,p->rf_fib+1,p->z+1,p->i0-1,p->mpt);
+  find_zs(p->r+1,p->rf_fib+1,p->z+1,p->i_c-1,p->mpt);
   
-  integration_b = qromb(cubic_spline,p->R0,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
+  integration_b = qromb(cubic_spline,p->R_c,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
 
   if (failure) {
     *E = integration_b;
@@ -169,16 +169,16 @@ bool successful_E_count(double *E,struct params *p)
   return true;
 }
 
-int find_i0(double R0, double *r)
+int find_i_c(double R_c, double *r)
 {
 
-  int i0 = 1;
+  int i_c = 1;
 
-  while (r[i0]<=R0) i0 += 1;
+  while (r[i_c]<=R_c) i_c += 1;
 
-  i0 -= 1;
+  i_c -= 1;
   
-  return (i0 < 1) ? 1 : i0;
+  return (i_c < 1) ? 1 : i_c;
 
 }
 
@@ -218,7 +218,7 @@ double E_bulk_surface(struct params *p,double psiR,
 
   // add density fluctuations term
   E += (p->delta*p->delta*p->omega*0.5
-	*(0.75*p->delta*p->delta-1)*(1-p->R0*p->R0/(p->R*p->R)));
+	*(0.75*p->delta*p->delta-1)*(1-p->R_c*p->R_c/(p->R*p->R)));
 
   // add surface term tension terms
   E += +0.5+1.0/p->R*(-(1+p->k24)*(sin(psiR)*sin(psiR))/p->R+2.0*p->gamma_s);  
@@ -245,7 +245,7 @@ void compute_rfb(struct params *p)
 
   double cosy;
   
-  for (int i = p->i0; i <= p->mpt; i++) {  // compute f_fibril*r
+  for (int i = p->i_c; i <= p->mpt; i++) {  // compute f_fibril*r
 
     cosy = cos(p->y[1][i]);
 

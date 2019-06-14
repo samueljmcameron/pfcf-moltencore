@@ -20,7 +20,7 @@ void reset_guess_vals(struct params *p)
 {
 
   double current_R = p->R;
-  double current_R0 = p->R0;
+  double current_R_c = p->R_c;
   double current_eta = p->eta;
   double current_delta = p->delta;
   
@@ -28,9 +28,9 @@ void reset_guess_vals(struct params *p)
   p->Rupper = 1.5*p->Rguess;
   p->Rlower = 0.75*p->Rguess;
 
-  p->R0guess = current_R0;
-  p->R0upper = p->R0guess+0.01;
-  p->R0lower = 0.75*p->R0guess;
+  p->R_cguess = current_R_c;
+  p->R_cupper = p->R_cguess+0.01;
+  p->R_clower = 0.75*p->R_cguess;
 
   if (current_eta == current_eta) { // if eta is not NAN
     p->etaguess = current_eta;
@@ -55,7 +55,7 @@ void reset_guess_vals(struct params *p)
 void save_observables(FILE *observables,double E,struct params *p)
 {
   fprintf(observables,"%15.8e\t%15.8e\t%15.8e\t%15.8e\t%15.8e\t%15.8e\n",
-	  E,p->R,p->R0,p->eta,p->delta,p->y[1][p->mpt]);
+	  E,p->R,p->R_c,p->eta,p->delta,p->y[1][p->mpt]);
   return;
 }
 
@@ -79,7 +79,7 @@ void set_NAN(double *E,struct params *p)
 {
 
   p->R = sqrt(-1);
-  p->R0 = sqrt(-1);
+  p->R_c = sqrt(-1);
   p->eta = sqrt(-1);
   p->delta = sqrt(-1);
   *E = sqrt(-1);
@@ -87,10 +87,10 @@ void set_NAN(double *E,struct params *p)
   return;
 }
 
-void initialize_R_R0_eta_delta(struct params *p)
+void initialize_R_R_c_eta_delta(struct params *p)
 {
   p->R = p->Rguess;
-  p->R0 = p->R0guess;
+  p->R_c = p->R_cguess;
   p->eta = p->etaguess;
   p->delta = p->deltaguess;
   return;
@@ -146,13 +146,13 @@ void initialize_params(struct params *p,char **args)
   sscanf(args[5],"%lf",&p->omega);
   sscanf(args[6],"%lf",&p->gamma_s);
   sscanf(args[7],"%lf",&p->Rguess);
-  sscanf(args[8],"%lf",&p->R0guess);
+  sscanf(args[8],"%lf",&p->R_cguess);
   sscanf(args[9],"%lf",&p->etaguess);
   sscanf(args[10],"%lf",&p->deltaguess);
   sscanf(args[11],"%lf",&p->Rupper);
   sscanf(args[12],"%lf",&p->Rlower);
-  sscanf(args[13],"%lf",&p->R0upper);
-  sscanf(args[14],"%lf",&p->R0lower);
+  sscanf(args[13],"%lf",&p->R_cupper);
+  sscanf(args[14],"%lf",&p->R_clower);
   sscanf(args[15],"%lf",&p->etaupper);
   sscanf(args[16],"%lf",&p->etalower);
   sscanf(args[17],"%lf",&p->deltaupper);
@@ -177,13 +177,13 @@ void initialize_params_withstrain(struct params *p,char **args,double *strain)
   sscanf(args[5],"%lf",&p->omega);
   sscanf(args[6],"%lf",&p->gamma_s);
   sscanf(args[7],"%lf",&p->Rguess);
-  sscanf(args[8],"%lf",&p->R0guess);
+  sscanf(args[8],"%lf",&p->R_cguess);
   sscanf(args[9],"%lf",&p->etaguess);
   sscanf(args[10],"%lf",&p->deltaguess);
   sscanf(args[11],"%lf",&p->Rupper);
   sscanf(args[12],"%lf",&p->Rlower);
-  sscanf(args[13],"%lf",&p->R0upper);
-  sscanf(args[14],"%lf",&p->R0lower);
+  sscanf(args[13],"%lf",&p->R_cupper);
+  sscanf(args[14],"%lf",&p->R_clower);
   sscanf(args[15],"%lf",&p->etaupper);
   sscanf(args[16],"%lf",&p->etalower);
   sscanf(args[17],"%lf",&p->deltaupper);
@@ -213,10 +213,10 @@ void print_params(struct params *p)
   printf("gamma_s = %e\n",p->gamma_s);
 
 
-  printf("initial guesses for R, R0, eta, and delta:\n");
+  printf("initial guesses for R, R_c, eta, and delta:\n");
 
   printf("guess for R = %e\n",p->Rguess);
-  printf("guess for R0 = %e\n",p->R0guess);
+  printf("guess for R_c = %e\n",p->R_cguess);
   printf("guess for eta = %e\n",p->etaguess);
   printf("guess for delta = %e\n",p->deltaguess);
 
@@ -225,8 +225,8 @@ void print_params(struct params *p)
 
   printf("upper bound estimate of R = %e\n",p->Rupper);
   printf("lower bound estimate of R = %e\n",p->Rlower);
-  printf("upper bound estimate of R0 = %e\n",p->R0upper);
-  printf("lower bound estimate of R0 = %e\n",p->R0lower);
+  printf("upper bound estimate of R_c = %e\n",p->R_cupper);
+  printf("lower bound estimate of R_c = %e\n",p->R_clower);
   printf("upper bound estimate of eta = %e\n",p->etaupper);
   printf("lower bound estimate of eta = %e\n",p->etalower);
   printf("upper bound estimate of delta = %e\n",p->deltaupper);

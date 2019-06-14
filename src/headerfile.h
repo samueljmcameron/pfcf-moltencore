@@ -73,23 +73,23 @@ struct params{
   double ***c;
   double *z;
   int mpt;
-  int i0;
+  int i_c;
   int x_size;
-  // these three parameters are the typical ones I am minimizing with
+  // these 4 parameters are the typical ones I am minimizing with
   // respect to
   double R;
-  double R0;
+  double R_c;
   double eta;
   double delta;
-  // these 10 parameters are necessary to specify for finding minima
+  // these 13 parameters are necessary to specify for finding minima
   double Rguess;
-  double R0guess;
+  double R_cguess;
   double etaguess;
   double deltaguess;
   double Rupper;
   double Rlower;
-  double R0upper;
-  double R0lower;
+  double R_cupper;
+  double R_clower;
   double etaupper;
   double etalower;
   double deltaupper;
