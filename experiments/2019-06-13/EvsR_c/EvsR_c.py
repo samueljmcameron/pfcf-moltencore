@@ -26,13 +26,12 @@ if __name__=="__main__":
     rp = ReadParams(scan=scan,loadsuf=loadsuf,savesuf=loadsuf)
         
     # create a class to do calculations with current parameters in scan.
-    run = SingleRun(rp,executable="../../../bin/EvsRc")
+    run = SingleRun(rp,executable="../../../bin/EvsR_c",valgrind=False)
     # run C executable.
     run.run_exe()
 
     # move file written by C executable from temporary data path to true data path
     run.mv_file('observables')
-    run.mv_file('psivsr')
 
 
 

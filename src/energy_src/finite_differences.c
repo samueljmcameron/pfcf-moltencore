@@ -26,16 +26,22 @@ void c_deriv(double (*f)(const gsl_vector *,void *),gsl_vector *x,int i,
      used. */
 
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h);
+  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fm1 = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)+h+h);
+  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fp1 = f(x,ps);
 
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h-h/2.0);
+  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fmh = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)+h);
+  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fph = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h/2.0);
+  printf("R_c = %lf\n",gsl_vector_get(x,i));
 
+  
   double r3 = 0.5 * (fp1 - fm1);
   double r5 = (4.0 / 3.0) * (fph - fmh) - (1.0 / 3.0) * r3;
 

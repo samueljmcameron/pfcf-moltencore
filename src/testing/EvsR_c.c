@@ -56,15 +56,23 @@ int main(int argc, char **argv)
 
   double dEdR_c;
   double abserr;
-  double h;
+  double h=1e-5;
 
-  // allocate a placeholder vector, but no need to initialize it.
-  gsl_vector *placeholder = gsl_vector_alloc(p.x_size);
+  
+  gsl_vector *x = gsl_vector_alloc(p.x_size);
 
-  for (p.R_c = 0.00; p.R_c < 0.5; p.R_c += 0.05) {
+  gsl_vector_set(x,0,p.R);
+  gsl_vector_set(x,1,p.R_c);
+  gsl_vector_set(x,2,p.eta);
+  gsl_vector_set(x,3,p.delta);
+
+  fprintf(observables,"# R = %e, eta = %e, delta = %e\n",p.R,p.eta,p.delta);
+  
+  for (p.R_c = 0.00; p.R_c < 0.3+1e-8; p.R_c += 0.01) {
+    gsl_vector_set(x,1,p.R_c);
     printf("%lf\n",p.R_c);
     E = E_calc(&p);
-    deriv_xi(f_dumb,placeholder,3,&p,h,&dEdR_c,&abserr);
+    deriv_xi(f_dumb,x,1,&p,h,&dEdR_c,&abserr);
     fprintf(observables,"%15.8e\t%15.8e\t%15.8e\t%15.8e\n",p.R_c,E,dEdR_c,abserr);
   }
 
@@ -73,14 +81,12 @@ int main(int argc, char **argv)
 
   free_vector(p.r,1,MAX_M);
   free_matrix(p.y,1,NE,1,MAX_M);
-  free_vector(p.r_cp,1,MAX_M);
-  free_matrix(p.y_cp,1,NE,1,MAX_M);
   free_vector(p.rf_fib,1,MAX_M);
   free_vector(p.z,1,MAX_M);
   free_matrix(p.s,1,NSI,1,NSJ);
   free_f3tensor(p.c,1,NCI,1,NCJ,1,MAX_M+1);
 
-  gsl_vector_free(placeholder);
+  gsl_vector_free(x);
 
   //  fclose(psivsr);
   fclose(observables);
@@ -90,13 +96,7 @@ int main(int argc, char **argv)
 }
 
 
-double f_dumb(const gsl_vector *placeholder,void *ps)
-// This function is just a dumb wrapper for the energy function. It returns
-// the same value as the energy function REGARDLESS of the elements in the
-// placeholder vector. It only requires that placeholder be of size p.x_size.
-// 
-// The sole purpose of this function is to be used as input to the numerical
-// differentiation routine I have written (based off of the gsl one).
+double f_dumb(const gsl_vector *x,void *ps)
 {
   
   double E_calc(struct params *p);
@@ -104,6 +104,11 @@ double f_dumb(const gsl_vector *placeholder,void *ps)
 
   double E;
   struct params *p = ps;
+
+  p->R = gsl_vector_get(x,0);
+  p->R_c = gsl_vector_get(x,1);
+  p->eta = gsl_vector_get(x,2);
+  p->delta = gsl_vector_get(x,3);
   
   
   E = E_calc(p);
