@@ -25,21 +25,19 @@ void c_deriv(double (*f)(const gsl_vector *,void *),gsl_vector *x,int i,
      the 3-point rule (x-h,x,x+h). Again the central point is not
      used. */
 
+  struct params *p = ps;
+  
+
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h);
-  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fm1 = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)+h+h);
-  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fp1 = f(x,ps);
 
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h-h/2.0);
-  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fmh = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)+h);
-  printf("R_c = %lf\n",gsl_vector_get(x,i));
   double fph = f(x,ps);
   gsl_vector_set(x,i,gsl_vector_get(x,i)-h/2.0);
-  printf("R_c = %lf\n",gsl_vector_get(x,i));
 
   
   double r3 = 0.5 * (fp1 - fm1);
@@ -83,26 +81,26 @@ int deriv_xi(double (*f)(const gsl_vector *,void *),const gsl_vector *x_scale,
   c_deriv(f,x,i,ps,h,&r_0,&round,&trunc);
   error = round + trunc;
 
-  if (round < trunc && (round > 0 && trunc > 0))
-    {
-      double r_opt, round_opt, trunc_opt, error_opt;
+  if (round < trunc && (round > 0 && trunc > 0)) {
+    double r_opt, round_opt, trunc_opt, error_opt;
 
-      /* Compute an optimised stepsize to minimize the total error,
-         using the scaling of the truncation error (O(h^2)) and
-         rounding error (O(1/h)). */
+    /* Compute an optimised stepsize to minimize the total error,
+       using the scaling of the truncation error (O(h^2)) and
+       rounding error (O(1/h)). */
 
-      double h_opt = h * pow (round / (2.0 * trunc), 1.0 / 3.0);
-      c_deriv(f,x,i,ps,h_opt,&r_opt,&round_opt,&trunc_opt);
-      error_opt = round_opt + trunc_opt;
+    double h_opt = h * pow (round / (2.0 * trunc), 1.0 / 3.0);
+    c_deriv(f,x,i,ps,h_opt,&r_opt,&round_opt,&trunc_opt);
+    error_opt = round_opt + trunc_opt;
 
-      /* Check that the new error is smaller, and that the new derivative 
-         is consistent with the error bounds of the original estimate. */
+    /* Check that the new error is smaller, and that the new derivative 
+       is consistent with the error bounds of the original estimate. */
 
-      if (error_opt < error && fabs (r_opt - r_0) < 4.0 * error) {
-	r_0 = r_opt;
-	error = error_opt;
-      }
+    if (error_opt < error && fabs (r_opt - r_0) < 4.0 * error) {
+      r_0 = r_opt;
+      error = error_opt;
     }
+    
+  }
 
   *result = r_0;
   *abserr = error;

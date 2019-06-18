@@ -145,8 +145,8 @@ bool successful_E_count(double *E,struct params *p)
   
   if (failure) {
     *E = integration_2233;
-    printf("failed to integrate frank free energy at (R,eta,delta) = (%e,%e,%e)\n",
-	   p->R,p->eta,p->delta);
+    printf("failed to integrate frank free energy at (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
+	   p->R,p->R_c,p->eta,p->delta);
     return false;
   }
 
@@ -158,8 +158,8 @@ bool successful_E_count(double *E,struct params *p)
 
   if (failure) {
     *E = integration_b;
-    printf("failed to integrate pf free energy at (R,eta,delta) = (%e,%e,%e)\n",
-	   p->R,p->eta,p->delta);
+    printf("failed to integrate pf free energy at (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
+	   p->R,p->R_c,p->eta,p->delta);
     return false;
   }
   
