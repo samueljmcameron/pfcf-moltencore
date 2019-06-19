@@ -1,0 +1,1 @@
+Testing derivatives and energy calculations of E with different number of grid points r[1..mpt]. Looking to see if there's an ideal size which is accurate but not too slow.

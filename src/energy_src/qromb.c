@@ -24,9 +24,9 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
   
   void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
   double trapzd(double (*func)(double,double *,double *,double *),double t0,
-		double t1, int n,double *x,double *y, double *z);
+		double t1, int n,double *x,double *y, double *z,bool *failure);
   double ss,dss;
-  int JMAX = 20;
+  int JMAX = 10000;
   double s[JMAX+2],h[JMAX+3]; //These store the successive trapezoidal approxi-
   int j;                      //mations and their relative stepsizes.
 
@@ -34,7 +34,7 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
   h[1]=1.0;
   for (j=1;j<=JMAX+1;j++) {
 
-    s[j]=trapzd(func,t0,t1,j,x,y,z);
+    s[j]=trapzd(func,t0,t1,j,x,y,z,failure);
 
     if (j >= K) {
 
