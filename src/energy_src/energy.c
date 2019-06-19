@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 #include <gsl/gsl_vector.h>
 #include "nrutil.h"
 #include "../headerfile.h"
@@ -78,7 +79,12 @@ double E_calc(struct params *p)
 
   p->i_c = find_i_c(p->R_c,p->r);
   
+
+  clock_t start, end;
+  start = clock();
   solvde_wrapper(scalv,p,h,false);
+  end = clock();
+  printf("time for solving ODE is %e\n",((double)(end-start))/CLOCKS_PER_SEC);
 
   if(successful_E_count(&E,p)) return E;
 
@@ -139,9 +145,24 @@ bool successful_E_count(double *E,struct params *p)
   
   compute_rf2233(p);
 
+
+  clock_t start, end;
+  start = clock();
+
   find_zs(p->r+1,p->rf_fib+1,p->z+1,0,p->mpt);
+
+  end = clock();
+  printf("time for solving cubic splines for full r[1..mpt] is %e\n",
+	 ((double)(end-start))/CLOCKS_PER_SEC);
+
+
+  start = clock();
   
   integration_2233 = qromb(cubic_spline,0,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
+
+  end = clock();
+  printf("time for integrating full r[1..mpt] is %e\n",
+	 ((double)(end-start))/CLOCKS_PER_SEC);
   
   if (failure) {
     *E = integration_2233;
@@ -151,10 +172,22 @@ bool successful_E_count(double *E,struct params *p)
   }
 
   compute_rfb(p);
+
+  start = clock();
   
   find_zs(p->r+1,p->rf_fib+1,p->z+1,p->i_c-1,p->mpt);
+
+  end = clock();
+  printf("time for solving cubic splines for partial r[%d..mpt] is %e\n",
+	 p->i_c,((double)(end-start))/CLOCKS_PER_SEC);
   
+  start = clock();
+
   integration_b = qromb(cubic_spline,p->R_c,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
+
+  end = clock();
+  printf("time for integrating partial r[%d..mpt] is %e\n",
+	 p->i_c,((double)(end-start))/CLOCKS_PER_SEC);
 
   if (failure) {
     *E = integration_b;

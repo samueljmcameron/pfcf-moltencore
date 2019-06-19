@@ -42,6 +42,7 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
       
       if (fabs(dss) <= EPS*fabs(ss)) {
 	*failure = false;
+	printf("j = %d\n",j);
 	return ss;
       }
     }
