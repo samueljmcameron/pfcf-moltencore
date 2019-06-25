@@ -31,7 +31,8 @@ if __name__=="__main__":
     run.run_exe()
 
     # move file written by C executable from temporary data path to true data path
-    run.mv_file('observables')
+    run.mv_file('psivsr')
+    run.mv_file('hermite-psivsr')
 
 
 

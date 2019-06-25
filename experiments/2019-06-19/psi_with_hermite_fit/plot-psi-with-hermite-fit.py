@@ -4,7 +4,7 @@ import sys
 import time
 import matplotlib.pyplot as plt
 sys.path.append('../../scripts/')
-from observabledata import ObservableData
+from psidata import PsiData
 from fig_settings import configure_fig_settings
 
 if __name__=="__main__":
@@ -29,12 +29,11 @@ if __name__=="__main__":
 
 
     # read in file name info
-    obs = ObservableData(scan=scan,loadsuf=loadsuf,savesuf=loadsuf)
-        
-    R_c = obs.data[:,0]
-    E = obs.data[:,1]
-    dEdR_c = obs.data[:,2]
-    err = obs.data[:,3]
+    psidata = PsiData(scan=scan,loadsuf=loadsuf,savesuf=loadsuf)
+
+    hermitedata = PsiData(scan=scan,loadsuf=loadsuf,savesuf=loadsuf,
+                          name = "hermite-psivsr")
+
 
     
     fig = plt.figure()
@@ -47,17 +46,23 @@ if __name__=="__main__":
 
     ax3 = fig.add_subplot(3,1,3)
 
-    ax1.plot(R_c,E,'.')
-    ax1.set_ylim(-4,4)
-    ax1.set_ylabel(r'$E$')
-    ax2.plot(R_c,dEdR_c,'.',label='qromb')
-    ax2.plot(R_c,np.gradient(E,R_c),label='py deriv')
-    ax2.legend(frameon=False)
-    ax2.set_ylabel(r'$\frac{\partial E}{\partial R_c}$')
-    ax2.set_ylim(-1,dEdR_c[-1])
-    ax3.plot(R_c,err*1e4,'.')
-    ax3.set_ylabel('derivative error (' + r'$\times \num{1e4}$' + ')')
-    ax3.set_xlabel(r'$R_c$')
+    ax1.plot(psidata.r(),psidata.psi(),'.',label='actual')
+    ax1.plot(hermitedata.r(),hermitedata.psi(),'-',label='fit')
+    ax1.set_ylabel(r'$\psi(r)$')
+
+    ax2.plot(psidata.r(),psidata.psiprime(),'.',label='actual')
+    ax2.plot(hermitedata.r(),hermitedata.psiprime(),'-',label='fit')
+    ax2.set_ylabel(r'$\frac{d\psi}{dr}$')
+
+    ax3.plot(psidata.r(),psidata.rf_fibril(),'.',label='actual')
+    ax3.plot(hermitedata.r(),hermitedata.rf_fibril(),'-',label='fit')
+    ax3.legend(frameon=False)
+    ax3.set_ylabel(r'$r\times f_{\mathrm{fibril}}(r)$')
+    ax3.set_xlabel(r'$r$')
+
+
     fig.subplots_adjust(left=0.2)
 
-    fig.savefig(obs.observable_sname('EvsR_c'))
+    fig.savefig(psidata.psivsr_sname())
+
+    plt.show()

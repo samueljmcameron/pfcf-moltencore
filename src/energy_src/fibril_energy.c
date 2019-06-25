@@ -3,7 +3,7 @@
 #include <math.h>
 #include "../headerfile.h"
 
-#define CPTR_ERR 1e-15n
+#define CPTR_ERR 1e-15
 
 
 double rf_fibril(double x,struct params *p)
