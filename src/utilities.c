@@ -63,11 +63,14 @@ void save_observables(FILE *observables,double E,struct params *p)
 
 void save_psivsr(FILE *psivsr,struct params *p)
 {
+
+  double rf_fibril(double x,struct params *p);
+
   int i;
 
   for (i = 1; i <= p->mpt; i++) {
     fprintf(psivsr,"%13.6e\t%13.6e\t%13.6e\t%13.6e\n",p->r[i],p->y[1][i],p->y[2][i],
-	    p->rf_fib[i]);
+	    rf_fibril(p->r[i],p));
   }
   printf("psi(R) = %1.2e\n",p->y[1][p->mpt]);
   return;
@@ -96,21 +99,29 @@ void initialize_R_R_c_eta_delta(struct params *p)
   return;
 }
 
+void propagate_r(double *r, double R,int M0)
+{
+
+  double h = R/(M0-1);    // compute stepsize in r[1..mpt] 
+  // reset r with evenly spaced points from 0 to R.
+  for (int k=1;k <=M0; k++) r[k] = (k-1)*h; 
+  return;
+}
+
 void initialize_param_vectors(struct params *p)
 {
 
+  void propagate_r(double *r, double R,int M0);
+  void constantGuess(double *r,double **y,double val,int mpt);
 
-  void constantGuess(double *r,double **y,double val,double h,int mpt);
+
   p->r = vector(1,MAX_M);
-  p->z = vector(1,MAX_M);
   p->y = matrix(1,NE,1,MAX_M);
-  p->rf_fib = vector(1,MAX_M);
   p->s = matrix(1,NSI,1,NSJ);
   p->c = f3tensor(1,NCI,1,NCJ,1,MAX_M+1);
 
-
-  double h = p->Rguess/(p->mpt-1);
-  constantGuess(p->r,p->y,0.3,h,p->mpt); //linear initial guess for psi(r)
+  propagate_r(p->r,p->R,p->mpt);
+  constantGuess(p->r,p->y,0.3,p->mpt); //linear initial guess for psi(r)
 
   return;
 }
@@ -119,18 +130,19 @@ void initialize_param_vectors(struct params *p)
 void initialize_param_vectors_linearguess(struct params *p)
 {
 
-  void linearGuess(double *r, double **y, double initialSlope,double h,int mpt);
+  void propagate_r(double *r, double R,int M0);
+  void linearGuess(double *r, double **y, double initialSlope,int mpt);
 
   p->r = vector(1,MAX_M);
   p->y = matrix(1,NE,1,MAX_M);
-  p->rf_fib = vector(1,MAX_M);
   p->s = matrix(1,NSI,1,NSJ);
   p->c = f3tensor(1,NCI,1,NCJ,1,MAX_M+1);
 
+  propagate_r(p->r,p->R,p->mpt);
 
-  double h = p->Rguess/(p->mpt-1);
   double slopeguess = M_PI/(4.0*p->Rguess);
-  linearGuess(p->r,p->y,slopeguess,h,p->mpt); //linear initial guess for psi(r)
+
+  linearGuess(p->r,p->y,slopeguess,p->mpt); //linear initial guess for psi(r)
 
   return;
 }
@@ -158,7 +170,8 @@ void initialize_params(struct params *p,char **args)
   sscanf(args[17],"%lf",&p->deltaupper);
   sscanf(args[18],"%lf",&p->deltalower);
 
-  p->mpt = (MAX_M-1)/8+1;
+  p->M0 = MAX_M-1;
+  p->mpt = p->M0;
 
   print_params(p);
 
@@ -190,7 +203,8 @@ void initialize_params_withstrain(struct params *p,char **args,double *strain)
   sscanf(args[18],"%lf",&p->deltalower);
   sscanf(args[19],"%lf",strain);
 
-  p->mpt = (MAX_M-1)/8+1;
+  p->M0 = MAX_M-1;
+  p->mpt = p->M0;
 
   print_params(p);
 

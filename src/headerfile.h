@@ -34,7 +34,7 @@ typedef struct {
 #if defined(__STDC__) || defined(ANSI) || defined(NRANSI) /* ANSI */
 
 #define NE 2                    // # of 1st order DEs
-#define MAX_M ((256)*(256)+(1)) // max # of mesh points (2^M+1 for romberg integration)
+#define MAX_M 2049              // max # of mesh points (2^M+1 for romberg integration)
 #define NB 1                    // # of BCs at first boundary (k = 1)
 #define NSI NE                  // max # i of S_i,j
 #define NSJ (2*NE+1)            // max # j of S_i,j
@@ -58,7 +58,7 @@ typedef struct {
 
 
 struct params{
-  // these 14 parameters are necessary to specify in all cases
+  // these 12 parameters are necessary to specify in all cases
   double K33;
   double k24;
   double Lambda;
@@ -66,14 +66,10 @@ struct params{
   double gamma_s;
   double *r;
   double **y;
-  double *rf_fib;
-  double *r_cp;
-  double **y_cp;
   double **s;
   double ***c;
-  double *z;
   int mpt;
-  int i_c;
+  int M0;
   int x_size;
   // these 4 parameters are the typical ones I am minimizing with
   // respect to

@@ -41,14 +41,11 @@ int main(int argc, char **argv)
   FILE *observables;
   initialize_file(&observables,argv[1],"observables",p);
 
-  //  FILE *psivsr;
-  //  initialize_file(&psivsr,argv[1],"psivsr",p);
-
   double E;
 
   double dEdR_c;
   double abserr;
-  double h=1e-5;
+  double h=1e-6;
 
   
   gsl_vector *x = gsl_vector_alloc(p.x_size);
@@ -60,28 +57,24 @@ int main(int argc, char **argv)
 
   fprintf(observables,"# R = %e, eta = %e, delta = %e\n",p.R,p.eta,p.delta);
   
-  for (p.R_c = 0.00; p.R_c < 0.3+1e-8; p.R_c += 0.01) {
+  for (p.R_c = 0.00; p.R_c < 0.1+1e-8; p.R_c += 0.001) {
     gsl_vector_set(x,1,p.R_c);
     printf("%lf\n",p.R_c);
     E = E_calc(&p);
+    printf("E is calculated\n");
     deriv_xi(f_dumb,x,1,&p,h,&dEdR_c,&abserr);
+    printf("dE/dR_c is calculated\n");
     update_params(x,&p);
     fprintf(observables,"%15.8e\t%15.8e\t%15.8e\t%15.8e\n",p.R_c,E,dEdR_c,abserr);
-  }
-
-  //  save_psivsr(psivsr,&p);
-    
+  } 
 
   free_vector(p.r,1,MAX_M);
   free_matrix(p.y,1,NE,1,MAX_M);
-  free_vector(p.rf_fib,1,MAX_M);
-  free_vector(p.z,1,MAX_M);
   free_matrix(p.s,1,NSI,1,NSJ);
   free_f3tensor(p.c,1,NCI,1,NCJ,1,MAX_M+1);
 
   gsl_vector_free(x);
 
-  //  fclose(psivsr);
   fclose(observables);
 
   return 0;

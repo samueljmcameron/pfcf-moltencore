@@ -19,6 +19,8 @@ void psi_interp(double x,double *r, double **y,double *psi,double *psiprime)
 
   while (r[i]<x) i += 1;
 
+  i = i -1;
+
   *psi =  hermite_poly(x,r[i],r[i+1],y[1][i],y[1][i+1],
 		       y[2][i],y[2][i+1]);
 

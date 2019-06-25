@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include "../headerfile.h"
 
 
 #define EPS 1.0e-10
@@ -10,8 +11,8 @@
 /*Here EPS is the fractional accuracy desired, as determined by the extrapolation error estimate;
  JMAX limits the toptal number of steps; K is the number of points used in the extrapolation.*/
 
-double qromb(double (*func)(double,double *,double *,double *),double t0,double t1,
-	     double *x, double *y,double *z,bool *failure)
+double qromb(double (*func)(double,struct params *),double t0,double t1,
+	     struct params *p,bool *failure)
 /*Returns the integral of the function func from a to b. Integration is performed by Romberg's 
 method of order 2K, where, e.g., K=2 is Simpsons rule. */
 // tol is the magnitude of the function times tol0 with the integral being zero, e.g. in //
@@ -23,18 +24,17 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
 {
   
   void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-  double trapzd(double (*func)(double,double *,double *,double *),double t0,
-		double t1, int n,double *x,double *y, double *z,bool *failure);
+  double trapzd(double (*func)(double,struct params *),double t0,
+		double t1, int n,struct params *p,bool *failure);
   double ss,dss;
-  int JMAX = 10000;
+  int JMAX = 100;
   double s[JMAX+2],h[JMAX+3]; //These store the successive trapezoidal approxi-
   int j;                      //mations and their relative stepsizes.
 
 
   h[1]=1.0;
   for (j=1;j<=JMAX+1;j++) {
-
-    s[j]=trapzd(func,t0,t1,j,x,y,z,failure);
+    s[j]=trapzd(func,t0,t1,j,p,failure);
 
     if (j >= K) {
 
@@ -42,7 +42,6 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
       
       if (fabs(dss) <= EPS*fabs(ss)) {
 	*failure = false;
-	printf("j = %d\n",j);
 	return ss;
       }
     }

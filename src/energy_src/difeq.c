@@ -5,11 +5,10 @@
 
 
 void difeq(int k, int k1, int k2, int jsf, int isl, int isf,
-	   struct params *p,double h)
+	   struct params *p)
 /*Returns matrix s for solvde. See Numerical Recipes in C for details on what s is. */
 {
   double t1,t2, shalf,chalf,sine,cosine;
-  double tmp;
   if (k == k1) { // BC at first point.
     p->s[2][3] = 1.0;
     p->s[2][4] = 0.0;
@@ -23,8 +22,10 @@ void difeq(int k, int k1, int k2, int jsf, int isl, int isf,
   else { // interior point
 
     double delta = p->delta;
+
+    double h = p->r[k]-p->r[k-1];
     
-    if (k < p->i_c) {
+    if (p->r[k] < p->R_c) {
       double delta = 0.0;
     }
     

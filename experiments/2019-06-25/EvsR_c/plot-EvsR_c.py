@@ -61,3 +61,6 @@ if __name__=="__main__":
     fig.subplots_adjust(left=0.2)
 
     fig.savefig(obs.observable_sname('EvsR_c'))
+
+
+    plt.show()

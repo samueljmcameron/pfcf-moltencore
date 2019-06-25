@@ -12,6 +12,7 @@
 #include "../headerfile.h"
 
 #define LRG_NBR 1e10
+#define CPTR_ERR 1e-15
 
 
 
@@ -45,12 +46,11 @@ double E_calc(struct params *p)
 
 {
 
-  void solvde_wrapper(double scalv[],struct params *p,double h,
-		      bool ignore_first_y);
-  
-  void propagate_r(double *r, double h,int mpt);
-  
-  int find_i_c(double R_c, double *r);
+  void solvde_wrapper(double scalv[],struct params *p,bool ignore_first_y);
+
+  void propagate_r(double *r, double R,int M0);
+
+  void add_R_c(struct params *p);
   
   bool successful_E_count(double *E,struct params *p);
 
@@ -71,33 +71,16 @@ double E_calc(struct params *p)
     printf("something is too big or less than zero, so returning failed calculation.\n");
     return FAILED_E;
   }
-  
 
-  h = p->R/(p->mpt-1);    // compute stepsize in r[1..mpt] 
+  propagate_r(p->r,p->R,p->M0);
 
-  propagate_r(p->r,h,p->mpt);
+  add_R_c(p);
 
-  p->i_c = find_i_c(p->R_c,p->r);
-  
-
-  clock_t start, end;
-  start = clock();
-  solvde_wrapper(scalv,p,h,false);
-  end = clock();
-  printf("time for solving ODE is %e\n",((double)(end-start))/CLOCKS_PER_SEC);
+  solvde_wrapper(scalv,p,false);
 
   if(successful_E_count(&E,p)) return E;
 
   return FAILED_E;
-}
-
-
-void propagate_r(double *r, double h,int mpt)
-{
-  // only change r since psi, psi' are stored from last loop
-  int k;
-  for (k=1;k <=mpt; k++) r[k] = (k-1)*h; 
-  return;
 }
 
 
@@ -127,92 +110,46 @@ bool successful_E_count(double *E,struct params *p)
   
 {
 
-  void compute_rf2233(struct params *p);
-  void compute_rfb(struct params *p);
+
+  double rf_fibril(double x,struct params *p);
+
+  double qromb(double (*func)(double,struct params *),double t0,double t1,
+	       struct params *p,bool *failure);
+
   double E_bulk_surface(struct params *p,double psiR,
 			double integration_2233b1);
 
-  double cubic_spline(double t,double *x,double *y, double *z);
-  void find_zs(double *x, double *y, double *z,int m,int N);
-  double qromb(double (*func)(double,double *,double *,double *),double t0,double t1,
-	       double *x, double *y,double *z,bool *failure);
-
   
-  double integration_2233;
-  double integration_b;
+  double integration_2233b1;
 
   bool failure;
+
+  if (p->R_c > CPTR_ERR) {
+
+    integration_2233b1 = qromb(rf_fibril,0,p->R_c-CPTR_ERR,p,&failure);
   
-  compute_rf2233(p);
+    if (failure) {
+      *E = integration_2233b1;
+      printf("failed to integrate frank free energy with 0<r<R_c at"
+	     " (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
+	     p->R,p->R_c,p->eta,p->delta);
+      return false;
+    }
+  } else { integration_2233b1 = 0.0;}
 
+  integration_2233b1 += qromb(rf_fibril,p->R_c,p->R,p,&failure);
 
-  clock_t start, end;
-  start = clock();
-
-  find_zs(p->r+1,p->rf_fib+1,p->z+1,0,p->mpt);
-
-  end = clock();
-  printf("time for solving cubic splines for full r[1..mpt] is %e\n",
-	 ((double)(end-start))/CLOCKS_PER_SEC);
-
-
-  start = clock();
-  
-  integration_2233 = qromb(cubic_spline,0,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
-
-  end = clock();
-  printf("time for integrating full r[1..mpt] is %e\n",
-	 ((double)(end-start))/CLOCKS_PER_SEC);
-  
   if (failure) {
-    *E = integration_2233;
-    printf("failed to integrate frank free energy at (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
+    *E = integration_2233b1;
+    printf("failed to integrate frank free energy with R_c<r<R at (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
 	   p->R,p->R_c,p->eta,p->delta);
     return false;
   }
 
-  compute_rfb(p);
-
-  start = clock();
-  
-  find_zs(p->r+1,p->rf_fib+1,p->z+1,p->i_c-1,p->mpt);
-
-  end = clock();
-  printf("time for solving cubic splines for partial r[%d..mpt] is %e\n",
-	 p->i_c,((double)(end-start))/CLOCKS_PER_SEC);
-  
-  start = clock();
-
-  integration_b = qromb(cubic_spline,p->R_c,p->R,p->r+1,p->rf_fib+1,p->z+1,&failure);
-
-  end = clock();
-  printf("time for integrating partial r[%d..mpt] is %e\n",
-	 p->i_c,((double)(end-start))/CLOCKS_PER_SEC);
-
-  if (failure) {
-    *E = integration_b;
-    printf("failed to integrate pf free energy at (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
-	   p->R,p->R_c,p->eta,p->delta);
-    return false;
-  }
-  
-  *E = E_bulk_surface(p,p->y[1][p->mpt],integration_2233+integration_b);
+  *E = E_bulk_surface(p,p->y[1][p->mpt],integration_2233b1);
 
 
   return true;
-}
-
-int find_i_c(double R_c, double *r)
-{
-
-  int i_c = 1;
-
-  while (r[i_c]<=R_c) i_c += 1;
-
-  i_c -= 1;
-  
-  return (i_c < 1) ? 1 : i_c;
-
 }
 
 
@@ -260,151 +197,79 @@ double E_bulk_surface(struct params *p,double psiR,
   return E;
 }
 
-void compute_rfb(struct params *p)
-/*==============================================================================
-
-  Purpose: This function computes r*f_fibril(r) for all ri in r[1..mpt], and
-  stores it into the array rf_fib[1..mpt].
-
-  ------------------------------------------------------------------------------
-
-  Parameters:
-
-  p -- This struct has all of the constant parameter info (e.g. K33, k24).
-
-  ============================================================================*/
-{
-  double fb_r(struct params *p,double ri,double cos_yi);
-
-  double cosy;
-  
-  for (int i = p->i_c; i <= p->mpt; i++) {  // compute f_fibril*r
-
-    cosy = cos(p->y[1][i]);
-
-    p->rf_fib[i] = p->r[i]*fb_r(p,p->r[i],cosy);
-
-  }
-
-  return;
-}
 
 
-
-void compute_rf2233(struct params *p)
-/*==============================================================================
-
-  Purpose: This function computes r*f_fibril(r) for all ri in r[1..mpt], and
-  stores it into the array rf_fib[1..mpt].
-
-  ------------------------------------------------------------------------------
-
-  Parameters:
-
-  p -- This struct has all of the constant parameter info (e.g. K33, k24).
-
-  ============================================================================*/
+double rf_fibril(double x,struct params *p)
 {
 
-  double f2233_r(struct params *p,double ri,double sin_yi,
-		   double sin_2yi,double cos_yi,double yi_p);
+  void psi_interp(double x,double *r,double **y,double *psi,double *psiprime);
 
-
-
-  double siny, sin2y,cosy;
-  
-  p->rf_fib[1] = 0;
-  
-  for (int i = 2; i <= p->mpt; i++) {  // compute f_fibril*r
-
-    siny = sin(p->y[1][i]);
-
-    sin2y = sin(2*p->y[1][i]);
-
-    cosy = cos(p->y[1][i]);
-
-    p->rf_fib[i] = p->r[i]*f2233_r(p,p->r[i],siny,sin2y,cosy,
-				   p->y[2][i]);
-
-  }
-
-  return;
-}
-
-
-double fb_r(struct params *p,double ri,double cos_yi)
-/*==============================================================================
-
-  Purpose: This function computes the integrand of the energy functional (which
-  is the energy density r*f_fibril(r) in the model) at the point ri.
-
-  ------------------------------------------------------------------------------
-
-  Parameters:
-
-  p -- This struct has all of the constant parameter info (e.g. K33, k24).
-
-  ri -- This is the current grid point where the function is being calculated
-  at.
-
-  sin_yi, sin_2yi, cos_yi -- These are just shortcut variables for calculating
-  sin(psi(ri)), sin(2*psi(ri)), and cos(psi(ri)) (used to save time instead of
-  evaluating trig functions multiple times).
-
-  yi_p -- This is the value dpsi/dr evaluated at ri.
-
-  ------------------------------------------------------------------------------
-
-  Returns: Returns r*f_fibril(r) at the point ri.
-
-  ============================================================================*/
-{
+  if (x < CPTR_ERR) return 0;
 
   double ans;
 
-  ans = (p->Lambda*p->delta*p->delta/4.0
-	 *(4*M_PI*M_PI-p->eta*p->eta*cos_yi*cos_yi)
-	 *(4*M_PI*M_PI-p->eta*p->eta*cos_yi*cos_yi));
+  double psi,psi_p;
 
-  return ans;
+  psi_interp(x,p->r,p->y,&psi,&psi_p);
 
+  double sin_psi = sin(psi);
+  double sin_2psi = sin(2*psi);
+  double cos_psi = cos(psi);
+
+  
+
+  ans = (-(psi_p+0.5*sin_2psi/x)+0.5*(psi_p+0.5*sin_2psi/x)
+	 *(psi_p+0.5*sin_2psi/x)+0.5*p->K33*sin_psi*sin_psi*sin_psi
+	 *sin_psi/(x*x));
+
+  if (x >= p->R_c) {
+
+    ans += (p->Lambda*p->delta*p->delta/4.0
+	    *(4*M_PI*M_PI-p->eta*p->eta*cos_psi*cos_psi)
+	    *(4*M_PI*M_PI-p->eta*p->eta*cos_psi*cos_psi));
+
+  }
+
+  return ans*x;
+  
 }
 
-double f2233_r(struct params *p,double ri,double sin_yi,
-	       double sin_2yi,double cos_yi,double yi_p)
-/*==============================================================================
 
-  Purpose: This function computes the integrand of the energy functional (which
-  is the energy density r*f_fibril(r) in the model) at the point ri.
-
-  ------------------------------------------------------------------------------
-
-  Parameters:
-
-  p -- This struct has all of the constant parameter info (e.g. K33, k24).
-
-  ri -- This is the current grid point where the function is being calculated
-  at.
-
-  sin_yi, sin_2yi, cos_yi -- These are just shortcut variables for calculating
-  sin(psi(ri)), sin(2*psi(ri)), and cos(psi(ri)) (used to save time instead of
-  evaluating trig functions multiple times).
-
-  yi_p -- This is the value dpsi/dr evaluated at ri.
-
-  ------------------------------------------------------------------------------
-
-  Returns: Returns r*f_fibril(r) at the point ri.
-
-  ============================================================================*/
+void add_R_c(struct params *p)
 {
 
-  double ans;
+  int get_i_c(double *r,double R_c);
 
-  ans = (-(yi_p+0.5*sin_2yi/ri)+0.5*(yi_p+0.5*sin_2yi/ri)
-	 *(yi_p+0.5*sin_2yi/ri)+0.5*p->K33*sin_yi*sin_yi*sin_yi
-	 *sin_yi/(ri*ri));
+  int i_c = get_i_c(p->r,p->R_c);
+
+  p->mpt = p->M0;
+
+  if (fabs(p->r[i_c]-p->R_c) > CPTR_ERR) {
+
+    p->mpt += 1;
+    
+    for (int i = p->mpt; i > i_c; i--) p->r[i] = p->r[i-1];
+
+    p->r[i_c] = p->R_c;
+
+    p->y[1][p->mpt] = p->y[1][p->mpt-1];
+    p->y[2][p->mpt] = p->y[2][p->mpt-1];
+
+  } else { printf(" close to r[%d] when R_c = %e\n",i_c,p->R_c);}
+
+  return;
   
-  return ans;
-
 }
+
+
+int get_i_c(double *r,double R_c)
+{
+
+  int i = 1;
+
+  while (r[i] < R_c) i += 1;
+
+  return i;
+  
+}
+

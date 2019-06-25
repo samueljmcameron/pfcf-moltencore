@@ -11,6 +11,7 @@
 #include "nrutil.h"
 #include "headerfile.h"
 
+#define CPTR_ERR 1e-15
 
 
 
@@ -76,6 +77,15 @@ int deriv_xi(double (*f)(const gsl_vector *,void *),const gsl_vector *x_scale,
 
   struct params *p = ps;
 
+  if (i == 1 && fabs(p->R_c)< CPTR_ERR) {
+
+    *result = 0.0;
+    *abserr = 0.0;
+
+    return GSL_SUCCESS;
+
+  }
+
   x=gsl_vector_alloc(p->x_size);
   gsl_vector_memcpy(x,x_scale);
   c_deriv(f,x,i,ps,h,&r_0,&round,&trunc);
@@ -105,8 +115,12 @@ int deriv_xi(double (*f)(const gsl_vector *,void *),const gsl_vector *x_scale,
     
   }
 
+
+
   *result = r_0;
   *abserr = error;
+
+  gsl_vector_free(x);
 
   return GSL_SUCCESS;
 

@@ -58,8 +58,6 @@ int main(int argc, char **argv)
 
   free_vector(p.r,1,MAX_M);
   free_matrix(p.y,1,NE,1,MAX_M);
-  free_vector(p.rf_fib,1,MAX_M);
-  free_vector(p.z,1,MAX_M);
   free_matrix(p.s,1,NSI,1,NSJ);
   free_f3tensor(p.c,1,NCI,1,NCJ,1,MAX_M+1);
 

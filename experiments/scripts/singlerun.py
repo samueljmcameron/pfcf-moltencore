@@ -23,7 +23,7 @@ class SingleRun(object):
     
     def __init__(self,readparams,tmp_path="../../../tmp_data/",scan_dir="",
                  params=None,executable="../../../bin/full3var_onerun",strain=None,
-                 valgrind=False):
+                 valgrind=False,valFLAG=None):
 
         self.readparams = readparams
         self.tmp_path = tmp_path
@@ -31,6 +31,7 @@ class SingleRun(object):
         self.scan_dir = scan_dir
         self.strain = strain
         self.valgrind = valgrind
+        self.valFLAG = valFLAG
         if (params == None):
             self.params = self.readparams.params
         else:
@@ -41,23 +42,20 @@ class SingleRun(object):
     def run_exe(self):
         # run c executable to determine psi(r), R, delta, etc.
 
-        if self.valgrind:
-            if self.strain == None:
-                subprocess.run(["valgrind",self.executable,self.tmp_path,
-                                *self.params.values()],check=True)
-
-            else:
-                subprocess.run(["valgrind",self.executable,self.tmp_path,
-                                *self.params.values(),self.strain],check=True)
+        if self.valgrind and self.valFLAG != None:
+            cmd_args = ["valgrind",self.valFLAG,self.executable]
+        elif self.valgrind:
+            cmd_args = ["valgrind",self.executable]
         else:
-            if self.strain == None:
-                subprocess.run([self.executable,self.tmp_path,
-                                *self.params.values()],check=True)
+            cmd_args = [self.executable]
 
-            else:
-                subprocess.run([self.executable,self.tmp_path,
-                                *self.params.values(),self.strain],check=True)
-
+        if self.strain == None:
+            subprocess.run([*cmd_args,self.tmp_path,
+                            *self.params.values()],check=True)
+            
+        else:
+            subprocess.run([*cmd_args,self.executable,self.tmp_path,
+                            *self.params.values(),self.strain],check=True)
 
         return
 

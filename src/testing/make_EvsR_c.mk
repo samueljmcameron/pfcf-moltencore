@@ -12,8 +12,8 @@ OBJDIR = ../../obj
 
 LOCAL_SRC = EvsR_c.c
 
-ENERGY_SRC := pinvs.c red.c bksub.c energy.c nrutil.c polint.c trapzd.c \
-              solvde.c difeq.c finite_differences.c qromb.c shared.c spline.c
+ENERGY_SRC := pinvs.c red.c bksub.c energy.c nrutil.c polint.c trapzd.c hermite_spline.c \
+              solvde.c difeq.c finite_differences.c qromb.c shared.c
 
 SHARED_SRC := utilities.c
 
