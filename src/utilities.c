@@ -115,13 +115,13 @@ void initialize_param_vectors(struct params *p)
   void constantGuess(double *r,double **y,double val,int mpt);
 
 
-  p->r = vector(1,MAX_M);
-  p->y = matrix(1,NE,1,MAX_M);
+  p->r = vector(1,p->M0+1);
+  p->y = matrix(1,NE,1,p->M0+1);
   p->s = matrix(1,NSI,1,NSJ);
-  p->c = f3tensor(1,NCI,1,NCJ,1,MAX_M+1);
+  p->c = f3tensor(1,NCI,1,NCJ,1,p->M0+2);
 
-  propagate_r(p->r,p->R,p->mpt);
-  constantGuess(p->r,p->y,0.3,p->mpt); //linear initial guess for psi(r)
+  propagate_r(p->r,p->R,p->M0);
+  constantGuess(p->r,p->y,0.3,p->M0); //linear initial guess for psi(r)
 
   return;
 }
@@ -248,6 +248,56 @@ void print_params(struct params *p)
 
   return;
 }
+
+void initialize_params_with_mpt(struct params *p,char **args)
+{
+
+  void print_only_some_params(struct params *p);
+  
+  sscanf(args[2],"%lf",&p->K33);
+  sscanf(args[3],"%lf",&p->k24);
+  sscanf(args[4],"%lf",&p->Lambda);
+  sscanf(args[5],"%lf",&p->omega);
+  sscanf(args[6],"%lf",&p->gamma_s);
+  sscanf(args[7],"%lf",&p->Rguess);
+  sscanf(args[8],"%lf",&p->R_cguess);
+  sscanf(args[9],"%lf",&p->etaguess);
+  sscanf(args[10],"%lf",&p->deltaguess);
+  sscanf(args[11],"%d",&p->mpt);
+
+  p->M0 = p->mpt;
+
+  print_only_some_params(p);
+  
+  return;
+
+}
+
+
+void print_only_some_params(struct params *p)
+{
+
+  printf("\n\nparameter values for minimization:\n");
+
+  printf("K33 = %e\n",p->K33);
+  printf("k24 = %e\n",p->k24);
+  printf("Lambda = %e\n",p->Lambda);
+  printf("omega = %e\n",p->omega);
+  printf("gamma_s = %e\n",p->gamma_s);
+
+
+  printf("initial guesses for R, R_c, eta, and delta:\n");
+
+  printf("initial R = %e\n",p->Rguess);
+  printf("initial R_c = %e\n",p->R_cguess);
+  printf("initial for eta = %e\n",p->etaguess);
+  printf("initial for delta = %e\n",p->deltaguess);
+
+  printf("mpt=%d\n",p->mpt);
+
+  return;
+}
+
 
 void initialize_file(FILE **output,char *path,char *fname,struct params p)
 {

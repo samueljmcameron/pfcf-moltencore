@@ -20,7 +20,7 @@ if __name__=="__main__":
     scan['\\gamma_s'] = gamma
     scan['\\Lambda']=Lambda
     scan['\\omega']= omega
-    scan['mpt'] = str(2**power2+1)
+    scan['mpt'] = str(2**power2)
     
     loadsuf=["K_{33}","k_{24}","\\Lambda","\\omega","\\gamma_s"]
 

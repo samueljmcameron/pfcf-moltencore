@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -I. -I../ -O2
 LINKER = gcc
 LFLAGS = -Wall -I../ -O2 -lm -lgsl -lgslcblas
-TARGET = EvsR_c-different-grid-sizes
+TARGET = Evsh
 
 BINDIR = ../../bin
 #GSL_SRCDIR = ../edited_gsl_src
@@ -10,7 +10,7 @@ ENERGY_SRCDIR = ../energy_src
 SHARED_SRCDIR = ..
 OBJDIR = ../../obj
 
-LOCAL_SRC = EvsR_c-different-grid-sizes.c
+LOCAL_SRC = Evsh.c
 
 ENERGY_SRC := pinvs.c red.c bksub.c energy.c nrutil.c polint.c trapzd.c hermite_spline.c \
               solvde.c difeq.c finite_differences.c qromb.c shared.c
