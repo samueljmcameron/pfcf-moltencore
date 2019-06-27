@@ -143,6 +143,8 @@ void initialize_params_with_mpt(struct params *p,char **args)
   sscanf(args[10],"%lf",&p->deltaguess);
   sscanf(args[11],"%d",&p->mpt);
 
+  p->M0 = p->mpt;
+
   print_only_some_params(p);
   
   return;
