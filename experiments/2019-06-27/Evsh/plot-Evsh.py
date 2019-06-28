@@ -6,10 +6,13 @@ import matplotlib.pyplot as plt
 sys.path.append('../../scripts/')
 from observabledata import ObservableData
 from fig_settings import configure_fig_settings
+import seaborn as sns
 
 if __name__=="__main__":
 
     configure_fig_settings()
+
+    colors = sns.color_palette()
 
     width = 3.37
     height = 3.37
@@ -29,83 +32,44 @@ if __name__=="__main__":
 
     
     fig = plt.figure()
-    fig.set_size_inches(width,3*height)
+    fig.set_size_inches(width,2*height)
     
 
-    ax1 = fig.add_subplot(4,1,1)
+    ax1 = fig.add_subplot(2,1,1)
+    ax2 = fig.add_subplot(2,1,2)
 
-    ax2 = fig.add_subplot(4,1,2)
-
-    ax3 = fig.add_subplot(4,1,3)
-
-    ax4 = fig.add_subplot(4,1,4)
-
-
-    # load in data from timings
-    time_data = np.loadtxt("data/timings.txt")
-    mpts = time_data[:,0].astype(int)
-    times = time_data[:,1]
-
-    R_cs = np.empty([2],float)
-
-    Es = np.empty([len(mpts),2],float)
-
-    dEdR_cs = np.empty([len(mpts),2],float)
-
-    errs = np.empty([len(mpts),2],float)
-
+    mpts = np.array([16384,32768,65536],int)#[1024,2048,4096,8192],int)#,
 
     for i,mpt in enumerate(mpts):
 
-        scan['mpt'] = mpt
+        scan['mpt'] = str(mpt)
+        print(i)
 
         # read in file name info
         obs = ObservableData(scan=scan,loadsuf=loadsuf,savesuf=loadsuf,
-                             name=f"EvsR_c-{mpt}")
+                             name=f"Evsh-{mpt}")
 
-
-        R_cs[0] = obs.data[0,0]
-        R_cs[1] = obs.data[1,0]
-
-        Es[i,0] = obs.data[0,1]
-        Es[i,1] = obs.data[1,1]
-
-        dEdR_cs[i,0] = obs.data[0,2]
-        dEdR_cs[i,1] = obs.data[1,2]
-
-        errs[i,0] = obs.data[0,3]
-        errs[i,1] = obs.data[1,3]
+        hs = obs.data[:,0]
+        dEdR_cs = obs.data[:,1]
+        err_trunc = obs.data[:,2]
+        err_round = obs.data[:,3]
 
 
 
-
-    for i,R_c in enumerate(R_cs[:-1]):
-
-        ax1.plot(mpts,Es[:,i],'.',label=rf'$R_c={R_c}$')
-
-        ax2.plot(mpts,dEdR_cs[:,i],'.',label=rf'$R_c={R_c}$')
-
-        ax3.plot(mpts,errs[:,i]*1e4,'.',label=rf'$R_c={R_c}$')
-
-    ax4.plot(mpts,times,'.')
+        ax1.plot(hs,dEdR_cs,'-',label=rf'$m={mpt}$',color=colors[i])
+        ax2.plot(hs,err_trunc,'-',label=rf'$m={mpt}$',color=colors[i])
+        ax2.plot(hs,err_round,'-',color=colors[i])
 
 
-    ax1.set_ylabel(r'$E(R_c)$')
-
+    ax1.set_ylabel(r'$\frac{\partial E}{\partial R_c}$')
     ax1.set_xscale('log')
+    ax1.legend(frameon=False)
+
 
     ax2.set_xscale('log')
-    ax2.set_ylabel(r'$\frac{\partial E}{\partial R_c}$')
-
-    ax3.set_xscale('log')
-    ax3.set_yscale('log')
-    ax3.set_ylabel('derivative error (' + r'$\times \num{1e4}$' + ')')
-
-    ax4.set_xscale('log')
-    ax4.set_yscale('log')
-    ax4.set_xlabel('number of points')
-    ax4.set_ylabel('time taken')
+    ax2.set_yscale('log')
+    ax2.set_ylabel('derivative error (' + r'$\times \num{1e4}$' + ')')
 
     fig.subplots_adjust(left=0.3)
 
-    fig.savefig(obs.observable_sname('EvsR_c'))
+    fig.savefig(obs.observable_sname('Evsh'))

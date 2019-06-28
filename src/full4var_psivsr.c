@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 
   void initialize_param_vectors(struct params *p);
 
-  void initialize_R_R0_eta_delta(struct params *p);
+  void initialize_R_R_c_eta_delta(struct params *p);
 
   void initialize_file(FILE **output,char *path,char *fname,struct params p);
 
@@ -29,13 +29,13 @@ int main(int argc, char **argv)
 
   void reset_guess_vals(struct params *p);
   
-  int full3var_driver(double *E,struct params *p,FILE *energy);
+  int full4var_driver(double *E,struct params *p,FILE *energy);
   
   struct params p; 
   initialize_params(&p,argv);
   initialize_param_vectors(&p);
   p.x_size = 4;
-  initialize_R_R0_eta_delta(&p);
+  initialize_R_R_c_eta_delta(&p);
 
 
 
@@ -48,13 +48,14 @@ int main(int argc, char **argv)
   double E;
 
 
-  int calculation = full3var_driver(&E,&p,(NULL));
+  int calculation = full4var_driver(&E,&p,(NULL));
 
+  printf("CALCULATION = %d\n",calculation);
   
   if (calculation == DRIVER_POORSCALING) {
     printf("RETRYING!\n");
     reset_guess_vals(&p);
-    calculation = full3var_driver(&E,&p,(NULL));
+    calculation = full4var_driver(&E,&p,(NULL));
   }
   if (calculation == DRIVER_SUCCESS) {
     printf("success!\n");
@@ -69,9 +70,7 @@ int main(int argc, char **argv)
   save_observables(observables,E,&p);
 
   free_vector(p.r,1,MAX_M);
-  free_vector(p.z,1,MAX_M);
   free_matrix(p.y,1,NE,1,MAX_M);
-  free_vector(p.rf_fib,1,MAX_M);
   free_matrix(p.s,1,NSI,1,NSJ);
   free_f3tensor(p.c,1,NCI,1,NCJ,1,MAX_M+1);
 

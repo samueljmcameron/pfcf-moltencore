@@ -100,7 +100,6 @@ int deriv_xi(double (*f)(const gsl_vector *,void *),const gsl_vector *x_scale,
        rounding error (O(1/h)). */
 
     double h_opt = h * pow (round / (2.0 * trunc), 1.0 / 3.0);
-    printf("reducing h to %e\n",h_opt);
     c_deriv(f,x,i,ps,h_opt,&r_opt,&round_opt,&trunc_opt);
     error_opt = round_opt + trunc_opt;
 
@@ -108,7 +107,6 @@ int deriv_xi(double (*f)(const gsl_vector *,void *),const gsl_vector *x_scale,
        is consistent with the error bounds of the original estimate. */
 
     if (error_opt < error && fabs (r_opt - r_0) < 4.0 * error) {
-      printf("better guess was found!\n");
       r_0 = r_opt;
       error = error_opt;
     }

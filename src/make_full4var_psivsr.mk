@@ -2,16 +2,16 @@ CC = gcc
 CFLAGS = -I. -O2
 LINKER = gcc
 LFLAGS = -Wall -I. -O2 -lm -lgsl -lgslcblas
-TARGET = full3var_psivsr
+TARGET = full4var_psivsr
 
 BINDIR = ../bin
 GSL_SRCDIR = edited_gsl_src
 SHARED_SRCDIR = energy_src
 OBJDIR = ../obj
 
-LOCAL_SRC = full3var_driver.c full3var_psivsr.c utilities.c
+LOCAL_SRC = full4var_driver.c full4var_psivsr.c utilities.c
 
-SHARED_SRC := pinvs.c red.c bksub.c energy.c nrutil.c polint.c trapzd.c spline.c \
+SHARED_SRC := pinvs.c red.c bksub.c energy.c nrutil.c polint.c trapzd.c hermite_spline.c \
               solvde.c difeq.c finite_differences.c qromb.c shared.c
 
 EDITED_GSL_SRC := $(wildcard $(GSL_SRCDIR)/*.c)
