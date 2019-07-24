@@ -23,7 +23,7 @@ class OneRun(ReadParams):
     #  executable - the executable that creates and writes the output files
     
     def __init__(self,scan={},tmp_path="../../../tmp_data/",scan_dir="",
-                 executable="../../../bin/full3var_onerun",strain=None,
+                 executable="../../../bin/full4var_onerun",strain=None,
                  loadsuf=["K_{33}","k_{24}","\\Lambda","\\omega","\\gamma_s"],
                  savesuf=["K_{33}","k_{24}","\\Lambda","\\omega","\\gamma_s"],
                  datfile="data/input.dat",valgrind=False,valFLAG=None):
