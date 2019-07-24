@@ -66,11 +66,15 @@ double E_calc(struct params *p)
 
 
   if (p->R <= 0 || p->eta <= 0 || p->eta >= 8.0
-      || fabs(p->delta) >= 1.0 || p->R_c >= p->R || p->R_c < -1e-8) {
+      || fabs(p->delta) >= 1.0 || p->R_c >= p->R) {
     printf("p->R = %e, p->R_c = %e, p->eta = %e, p->delta = %e\n",p->R,p->R_c,p->eta,p->delta);
     printf("something is too big or less than zero, so returning failed calculation.\n");
     return FAILED_E;
-  }
+  } 
+
+  // DEFINE E(R_c) TO BE EVEN IN R_c
+
+  p->R_c = fabs(p->R_c);
 
   propagate_r(p->r,p->R,p->M0);
 

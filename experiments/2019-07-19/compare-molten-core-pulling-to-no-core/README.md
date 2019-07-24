@@ -1,0 +1,1 @@
+Comparing the molten core fibril's elastic properties to that of the no core fibril (at the parameters gamma = 0.04, k24 = 0.5, Lambda = 600.0, omega = 20.0).

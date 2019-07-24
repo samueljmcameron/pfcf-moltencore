@@ -66,12 +66,14 @@ class ObservableData(ReadParams):
             return vlength+0
         elif varname == 'R':
             return vlength+1
-        elif varname == 'eta':
+        elif varname == 'R_c':
             return vlength+2
-        elif varname == 'delta':
+        elif varname == 'eta':
             return vlength+3
-        elif varname == 'surfacetwist':
+        elif varname == 'delta':
             return vlength+4
+        elif varname == 'surfacetwist':
+            return vlength+5
         else:
             raise ValueError(f"The label {varname} does not correspond to any "
                              f"columns in the file {self.observables_fname()}") 
