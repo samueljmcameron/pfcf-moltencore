@@ -18,7 +18,8 @@ class ObservableData(ReadParams):
                           "\\omega","\\gamma_s"],
                  savesuf=["K_{33}","k_{24}","\\Lambda",
                           "\\omega","\\gamma_s"],
-                 name= "observables"):
+                 name= "observables",loadfilepath="data",
+                 savefilepath="results"):
 
         ReadParams.__init__(self,datfile=datfile,
                             scan=scan,loadsuf=loadsuf,savesuf=savesuf)
@@ -26,6 +27,8 @@ class ObservableData(ReadParams):
         self.xaxis = xaxis
         self.scan_dir = scan_dir
         self.name = name
+        self.loadfilepath = loadfilepath
+        self.savefilepath = savefilepath
         if os.path.isfile(self.observables_fname()):
             self.data = np.loadtxt(self.observables_fname())
             self.file_exists = True
@@ -42,16 +45,16 @@ class ObservableData(ReadParams):
         suffix = self.write_suffix()
 
         if self.scan_dir != "":
-            fname =f"data/_{self.name}_{self.scan_dir}_{suffix}.txt"
+            fname =f"{self.loadfilepath}/_{self.name}_{self.scan_dir}_{suffix}.txt"
         else:
-            fname =f"data/_{self.name}_{suffix}.txt"
+            fname =f"{self.loadfilepath}/_{self.name}_{suffix}.txt"
         return fname
     
     def observable_sname(self,varname,plot_format="pdf"):
 
         suffix = self.write_suffix(suffix_type="save")
 
-        return f"results/_{varname}_{suffix}.{plot_format}"
+        return f"{self.savefilepath}/_{varname}_{suffix}.{plot_format}"
 
     def ylabelstr_to_column(self,varname,observables_num = 5):
         
@@ -105,12 +108,27 @@ class ObservableData(ReadParams):
 
         return result
 
-    def eta(self,observables_num=5):
+    def R_c(self,observables_num=5):
         
-        i = self.ylabelstr_to_column('eta',observables_num=observables_num)
+        i = self.ylabelstr_to_column('R_c',observables_num=observables_num)
 
         dim = len(self.data.shape)
         
+        if dim == 1:
+            result = self.data[i]
+        else:
+            result = self.data[:,i]
+
+        return result
+
+    def eta(self,observables_num=5):
+        
+
+        i = self.ylabelstr_to_column('eta',observables_num=observables_num)
+
+
+        dim = len(self.data.shape)
+
         if dim == 1:
             result = self.data[i]
         else:
