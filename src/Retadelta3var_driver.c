@@ -42,6 +42,8 @@ int Retadelta3var_driver(double *E,struct params *p,FILE *energy)
   double *dEdx;
   dEdx = vector(1,p->x_size);
 
+
+  
   gsl_vector *x_scale;
   x_scale = gsl_vector_alloc(p->x_size);
   scaleRetadelta3var_forward(x_scale,p);
@@ -68,10 +70,13 @@ int Retadelta3var_driver(double *E,struct params *p,FILE *energy)
   const gsl_multimin_fdfminimizer_type *T;
   T = gsl_multimin_fdfminimizer_vector_bfgs2;
 
+
+
   gsl_multimin_fdfminimizer *s;
   s = gsl_multimin_fdfminimizer_alloc(T,p->x_size);
 
   gsl_multimin_fdfminimizer_set(s,&my_func,x_scale,0.001,0.01);
+
 
   printf("%13s\t%13s\t%13s\t%13s\t%13s\t%13s\t%13s\t%13s\t%13s\t%13s\t%13s\n",
   	 "iteration","R","R_c","eta","delta","E","dEdR","dEdR_c","dEdeta",
@@ -238,8 +243,10 @@ double f(const gsl_vector *x_scale,void *ps)
   
 
   scaleRetadelta3var_backward(x_scale,p);
-    
+
+ 
   E = E_calc(p);
+
 
   return E;
 }

@@ -27,7 +27,7 @@ method of order 2K, where, e.g., K=2 is Simpsons rule. */
   double trapzd(double (*func)(double,struct params *),double t0,
 		double t1, int n,struct params *p,bool *failure);
   double ss,dss;
-  int JMAX = 100;
+  int JMAX = 22;
   double s[JMAX+2],h[JMAX+3]; //These store the successive trapezoidal approxi-
   int j;                      //mations and their relative stepsizes.
 

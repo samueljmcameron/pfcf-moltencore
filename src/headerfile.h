@@ -44,7 +44,7 @@ typedef struct {
 #define NCJ (NE-NB+1)           // # of columns in storage matrix within c[m][:][:]
 #define NCK (M+1)               // # number of points in tensor c, c[:][m][n]
 
-#define ITMAX      5000
+#define ITMAX      1000
 #define CONV_ODE   1e-10
 #define CONV_MIN   1e-7
 

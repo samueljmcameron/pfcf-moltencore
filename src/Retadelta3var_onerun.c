@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   struct params p; 
   initialize_params(&p,argv);
   initialize_param_vectors(&p);
-  p.x_size = 2;
+  p.x_size = 3;
   initialize_R_R_c_eta_delta(&p);
 
 

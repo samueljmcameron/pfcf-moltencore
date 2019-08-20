@@ -76,13 +76,19 @@ double E_calc(struct params *p)
 
   p->R_c = fabs(p->R_c);
 
+
   propagate_r(p->r,p->R,p->M0);
+
 
   add_R_c(p);
 
   solvde_wrapper(scalv,p,false);
 
-  if(successful_E_count(&E,p)) return E;
+
+  if(successful_E_count(&E,p)) {
+
+    return E;
+  }
 
   return FAILED_E;
 }
@@ -128,11 +134,13 @@ bool successful_E_count(double *E,struct params *p)
 
   bool failure;
 
+
   if (p->R_c > CPTR_ERR) {
 
     integration_2233b1 = qromb(rf_fibril,0,p->R_c-CPTR_ERR,p,&failure);
   
     if (failure) {
+
       *E = integration_2233b1;
       printf("failed to integrate frank free energy with 0<r<R_c at"
 	     " (R,R_c,eta,delta) = (%e,%e,%e,%e)\n",
@@ -140,6 +148,7 @@ bool successful_E_count(double *E,struct params *p)
       return false;
     }
   } else { integration_2233b1 = 0.0;}
+
 
   integration_2233b1 += qromb(rf_fibril,p->R_c,p->R,p,&failure);
 
@@ -149,6 +158,8 @@ bool successful_E_count(double *E,struct params *p)
 	   p->R,p->R_c,p->eta,p->delta);
     return false;
   }
+    printf("integrated frank free energy with R_c<r<R at (R,R_c,eta,delta) = (%.15e,%.15e,%.15e,%.15e)\n",
+	   p->R,p->R_c,p->eta,p->delta);
 
   *E = E_bulk_surface(p,p->y[1][p->mpt],integration_2233b1);
 

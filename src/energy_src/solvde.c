@@ -149,36 +149,56 @@ bool solvde(double scalv[],struct params *p,bool flag)
   jcf=ic3;
 
   for (it=1;it<=ITMAX;it++) { //Primary iteration loop.
+
+
     k=k1; //Boundary conditions at first point.
+
     difeq(k,k1,k2,j9,ic3,ic4,p);
+
     //    if (isnan(y[1][k])) printf("NAN at first BC!\n");
+
     if (!pinvs(ic3,ic4,j5,j9,jc1,k1,p->c,p->s)) {
       printf("R = %e\n",p->R);
       printf("failed at first BC!\n");
       return false;
     }
+
     for (k=k1+1;k<=k2;k++) { //Finite difference equations at all point pairs.
+
+
       kp=k-1;
+
       difeq(k,k1,k2,j9,ic1,ic4,p);
+
       //      if (isnan(y[1][k])) printf("NAN at k = %d!\n",k);
+
       red(ic1,ic4,j1,j2,j3,j4,j9,ic3,jc1,jcf,kp,p->c,p->s);
+
       if (!pinvs(ic1,ic4,j3,j9,jc1,k,p->c,p->s)) {
 	printf("R = %e\n",p->R);
 	printf("failed at point k = %d in finite differences\n",k);
 	return false;
       }
+
     }
 
     k=k2+1;// Final boundary conditions.
     difeq(k,k1,k2,j9,ic1,ic2,p);
+
     //    if (isnan(y[1][k])) printf("NAN at last BC!\n");
+
+
     red(ic1,ic2,j5,j6,j7,j8,j9,ic3,jc1,jcf,k2,p->c,p->s);
+
     if (!pinvs(ic1,ic2,j7,j9,jcf,k2+1,p->c,p->s)) {
       printf("R = %e\n",p->R);
       printf("failed at last BC!\n");
       return false;
     }
+
+
     bksub(NE,NB,jcf,k1,k2,p->c); //Backsubstitution.
+
     err=0.0;
     for (j=1;j<=NE;j++) { //Convergence check, accumulate average error
       errj=vmax=0.0;
@@ -204,6 +224,7 @@ bool solvde(double scalv[],struct params *p,bool flag)
 	//if (isnan(p->y[j][k])) printf("NAN!\n");
       }
     }
+
     if (err < CONV_ODE) { // Point with largest error for each variable can
                       // be monitored by writing out kmax and
                       // ermax.
